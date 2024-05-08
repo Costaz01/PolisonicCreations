@@ -1,24 +1,27 @@
-s.reboot;
+s.boot;
 
 (
-MIDIClient.init; // Inizializza il client MIDI
-MIDIIn.connectAll; // Connette tutte le sorgenti MIDI disponibili
+SynthDef(\fmSynth,
+    {
+        arg freq = 440, modIndex = 3, modPartial = 1,
+        carPartial = 1, level = 0.05, outBus = 0,
+        effectBus, direct = 0.33;
+        var modSig, outSig;
+        modSig = SinOsc.ar(freq*modPartial,0,freq*modIndex);
+        outSig = SinOsc.ar(freq * carPartial + modSig,0,level);
+ Out.ar(effectBus,outSig * (1 - direct));
+        Out.ar(outBus,(outSig * direct).dup);
+    }
+).add )
 
-// Definisci una SynthDef con un argomento per la frequenza controllata da MIDI
-SynthDef(\sinewave, { |freq = 440|
-    Out.ar(0, SinOsc.ar(freq) * 0.2)
-}).add;
-
-// Crea un'istanza del synth
-~synth = Synth(\sinewave);
-
-// Crea una funzione per gestire i messaggi MIDI di controllo
-~midiControl = { |val|
-    ~synth.set(\freq, val.midicps); // Converte il valore MIDI in frequenza e imposta il parametro del synth
-};
-
-// Assegna la funzione di controllo MIDI al canale e al numero di controllo corretti
-MIDIdef.cc(\myControl, ~midiControl, 74, 1); // 74 è il numero di controllo, 1 è il canale MIDI
+(
+var bus = Bus.audio(s);
+x= Synth(\fmSynth,[\freq,440,\modIndex,2,\modPartial,2.4,\outBus,0,\level,0.1]);
+y= Synth.after(x,[\inBus,bus,\outBus,0]);
 )
 
-
+(
+n = NetAddr("127.0.0.1");
+OSCFunc.newMatching({|msg, time, addr, recvPort| x.set(\freq,msg[1]).postln}, '/FMSynth/freq', n);
+//OSCFunc.newMatching({|msg, time, addr, recvPort|x.set(\direct,msg[1]).postln}, '/FMSynth/reverb', n);
+)
