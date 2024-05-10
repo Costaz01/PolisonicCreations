@@ -1,7 +1,8 @@
-s.boot;
+s.reboot;
+
 
 (
-SynthDef(\fmSynth,
+SynthDef(\FMSynth,
     {
         arg freq = 440, modIndex = 3, modPartial = 1,
         carPartial = 1, level = 0.05, outBus = 0,
@@ -14,14 +15,17 @@ SynthDef(\fmSynth,
     }
 ).add )
 
+
 (
 var bus = Bus.audio(s);
-x= Synth(\fmSynth,[\freq,440,\modIndex,2,\modPartial,2.4,\outBus,0,\level,0.1]);
+x= Synth(\FMSynth,[\freq,440,\modIndex,2,\modPartial, 2.4,\outBus,0,\level,0.1]);
 y= Synth.after(x,[\inBus,bus,\outBus,0]);
 )
 
+
 (
 n = NetAddr("127.0.0.1");
-OSCFunc.newMatching({|msg, time, addr, recvPort| x.set(\freq,msg[1]).postln}, '/FMSynth/freq', n);
-//OSCFunc.newMatching({|msg, time, addr, recvPort|x.set(\direct,msg[1]).postln}, '/FMSynth/reverb', n);
+OSCFunc.newMatching({|msg, time, addr, recvPort| x.set(\freq,msg[1]).postln}, '/FMSynth/freq', n, 57120);
 )
+
+OSCFunc.trace(true);
