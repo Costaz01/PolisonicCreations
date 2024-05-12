@@ -9,8 +9,9 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+
 //==============================================================================
-MIDIVelocityModifyAudioProcessor::MIDIVelocityModifyAudioProcessor()
+OSCConnectionAudioProcessor::OSCConnectionAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -22,21 +23,20 @@ MIDIVelocityModifyAudioProcessor::MIDIVelocityModifyAudioProcessor()
                        )
 #endif
 {
-    sender.connect("127.0.0.1", 57120); 
+    sender.connect("127.0.0.1", 57120);
 }
 
-MIDIVelocityModifyAudioProcessor::~MIDIVelocityModifyAudioProcessor()
+OSCConnectionAudioProcessor::~OSCConnectionAudioProcessor()
 {
-    
 }
 
 //==============================================================================
-const juce::String MIDIVelocityModifyAudioProcessor::getName() const
+const juce::String OSCConnectionAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool MIDIVelocityModifyAudioProcessor::acceptsMidi() const
+bool OSCConnectionAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -45,7 +45,7 @@ bool MIDIVelocityModifyAudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool MIDIVelocityModifyAudioProcessor::producesMidi() const
+bool OSCConnectionAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -54,7 +54,7 @@ bool MIDIVelocityModifyAudioProcessor::producesMidi() const
    #endif
 }
 
-bool MIDIVelocityModifyAudioProcessor::isMidiEffect() const
+bool OSCConnectionAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -63,50 +63,50 @@ bool MIDIVelocityModifyAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double MIDIVelocityModifyAudioProcessor::getTailLengthSeconds() const
+double OSCConnectionAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int MIDIVelocityModifyAudioProcessor::getNumPrograms()
+int OSCConnectionAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int MIDIVelocityModifyAudioProcessor::getCurrentProgram()
+int OSCConnectionAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void MIDIVelocityModifyAudioProcessor::setCurrentProgram (int index)
+void OSCConnectionAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const juce::String MIDIVelocityModifyAudioProcessor::getProgramName (int index)
+const juce::String OSCConnectionAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void MIDIVelocityModifyAudioProcessor::changeProgramName (int index, const juce::String& newName)
+void OSCConnectionAudioProcessor::changeProgramName (int index, const juce::String& newName)
 {
 }
 
 //==============================================================================
-void MIDIVelocityModifyAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void OSCConnectionAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 }
 
-void MIDIVelocityModifyAudioProcessor::releaseResources()
+void OSCConnectionAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool MIDIVelocityModifyAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool OSCConnectionAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     juce::ignoreUnused (layouts);
@@ -131,52 +131,91 @@ bool MIDIVelocityModifyAudioProcessor::isBusesLayoutSupported (const BusesLayout
 }
 #endif
 
-void MIDIVelocityModifyAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+void OSCConnectionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
 {
-    
+    juce::ScopedNoDenormals noDenormals;
+    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+    // In case we have more outputs than inputs, this code clears any output
+    // channels that didn't contain input data, (because these aren't
+    // guaranteed to be empty - they may contain garbage).
+    // This is here to avoid people getting screaming feedback
+    // when they first compile a plugin, but obviously you don't need to keep
+    // this code if your algorithm always overwrites all the output channels.
+    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear (i, 0, buffer.getNumSamples());
+
+    // This is the place where you'd normally do the guts of your plugin's
+    // audio processing...
+    // Make sure to reset the state if your inner loop is processing
+    // the samples and the outer loop is handling the channels.
+    // Alternatively, you can process the samples with the channels
+    // interleaved by keeping the same state.
+    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    {
+        auto* channelData = buffer.getWritePointer (channel);
+
+        // ..do something to the data...
+    }
+
+    /********************************************************************************************/
+    // 9) implement the actual change in note velocity: for every message we are going to create a new
+    // message equal to the original one except for the velocity, add it to a buffer of midi messages and
+    // then we swap the modified midi buffer with the original one
     buffer.clear();
     juce::MidiBuffer processedMidi;
     int time;
     juce::MidiMessage m;
-    for (juce::MidiBuffer::Iterator i (midiMessages); i.getNextEvent (m, time);)
-    {
+    
+    for (juce::MidiBuffer::Iterator i (midiMessages); i.getNextEvent (m, time); ){
         if (m.isNoteOn())
         {
+            juce::uint8 newVel = (juce::uint8)noteOnVel;
             freq = (float) juce::MidiMessage::getMidiNoteInHertz (m.getNoteNumber());
             sender.send("/FMSynth/freq", freq);
+            m = juce::MidiMessage::noteOn(m.getChannel(), m.getNoteNumber(), newVel);
         }
-    }    
+        else if (m.isNoteOff()){}
+        else if (m.isPitchWheel()){}
+        processedMidi.addEvent(m,time);
+    }
+    
+    midiMessages.swapWith(processedMidi);
+    
+    //********************************************************************************************//
+
+    
 }
 
 //==============================================================================
-bool MIDIVelocityModifyAudioProcessor::hasEditor() const
+bool OSCConnectionAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-juce::AudioProcessorEditor* MIDIVelocityModifyAudioProcessor::createEditor()
+juce::AudioProcessorEditor* OSCConnectionAudioProcessor::createEditor()
 {
-    return new MIDIVelocityModifyAudioProcessorEditor (*this);
+    return new OSCConnectionAudioProcessorEditor (*this);
 }
 
 //==============================================================================
-void MIDIVelocityModifyAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
+void OSCConnectionAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void MIDIVelocityModifyAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void OSCConnectionAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
 }
 
 //==============================================================================
-
 // This creates new instances of the plugin..
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new MIDIVelocityModifyAudioProcessor();
+    return new OSCConnectionAudioProcessor();
 }

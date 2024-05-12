@@ -18,11 +18,11 @@
 //********************************************************************************************//
 // 5) Let's make our editor inherit the slider listener
 //********************************************************************************************//
-class MIDIVelocityModifyAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener
+class OSCConnectionAudioProcessorEditor  : public juce::AudioProcessorEditor, public juce::Slider::Listener
 {
 public:
-    MIDIVelocityModifyAudioProcessorEditor (MIDIVelocityModifyAudioProcessor&);
-    ~MIDIVelocityModifyAudioProcessorEditor() override;
+    OSCConnectionAudioProcessorEditor (OSCConnectionAudioProcessor&);
+    ~OSCConnectionAudioProcessorEditor() override;
 
     //==============================================================================
     void paint (juce::Graphics&) override;
@@ -31,7 +31,7 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    MIDIVelocityModifyAudioProcessor& audioProcessor;
+    OSCConnectionAudioProcessor& audioProcessor;
 
     //********************************************************************************************//
     // 1) Add the slider to the class declaration
@@ -43,5 +43,5 @@ private:
     void sliderValueChanged(juce::Slider* slider) override;
     //********************************************************************************************//
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MIDIVelocityModifyAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCConnectionAudioProcessorEditor)
 };

@@ -13,12 +13,12 @@
 //==============================================================================
 /**
 */
-class MIDIVelocityModifyAudioProcessor  : public juce::AudioProcessor
+class OSCConnectionAudioProcessor  : public juce::AudioProcessor
 {
 public:
     //==============================================================================
-    MIDIVelocityModifyAudioProcessor();
-    ~MIDIVelocityModifyAudioProcessor() override;
+    OSCConnectionAudioProcessor();
+    ~OSCConnectionAudioProcessor() override;
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -57,7 +57,9 @@ public:
     // now we need a function that set the value of this variable whenever the slide value is changed
     float noteOnVel;
     float freq;
+    
     //********************************************************************************************//
+
 
 
 
@@ -66,5 +68,5 @@ private:
     juce::OSCSender sender;
 
     
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MIDIVelocityModifyAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (OSCConnectionAudioProcessor)
 };

@@ -10,7 +10,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-MIDIVelocityModifyAudioProcessorEditor::MIDIVelocityModifyAudioProcessorEditor (MIDIVelocityModifyAudioProcessor& p)
+OSCConnectionAudioProcessorEditor::OSCConnectionAudioProcessorEditor (OSCConnectionAudioProcessor& p)
     : AudioProcessorEditor (&p), audioProcessor (p)
 {
     // Make sure that before the constructor has finished, you've set the
@@ -39,12 +39,12 @@ MIDIVelocityModifyAudioProcessorEditor::MIDIVelocityModifyAudioProcessorEditor (
 
 }
 
-MIDIVelocityModifyAudioProcessorEditor::~MIDIVelocityModifyAudioProcessorEditor()
+OSCConnectionAudioProcessorEditor::~OSCConnectionAudioProcessorEditor()
 {
 }
 
 //==============================================================================
-void MIDIVelocityModifyAudioProcessorEditor::paint (juce::Graphics& g)
+void OSCConnectionAudioProcessorEditor::paint (juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
@@ -54,7 +54,7 @@ void MIDIVelocityModifyAudioProcessorEditor::paint (juce::Graphics& g)
     g.drawFittedText ("Modify Velocity", getLocalBounds(), juce::Justification::centred, 1);
 }
 
-void MIDIVelocityModifyAudioProcessorEditor::resized()
+void OSCConnectionAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
@@ -70,7 +70,7 @@ void MIDIVelocityModifyAudioProcessorEditor::resized()
 //********************************************************************************************//
 // 8) Define the function that will be called whenever the slider value changes: it simply access
 // to the noteOnVel variable and update it
-void MIDIVelocityModifyAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
+void OSCConnectionAudioProcessorEditor::sliderValueChanged(juce::Slider* slider)
 {
     audioProcessor.noteOnVel = midiVolume.getValue();
 }
