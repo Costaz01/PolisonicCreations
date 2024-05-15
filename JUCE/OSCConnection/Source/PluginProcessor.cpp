@@ -171,12 +171,24 @@ void OSCConnectionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer
     for (juce::MidiBuffer::Iterator i (midiMessages); i.getNextEvent (m, time); ){
         if (m.isNoteOn())
         {
+            mul = 1.0;
             juce::uint8 newVel = (juce::uint8)noteOnVel;
             freq = (float) juce::MidiMessage::getMidiNoteInHertz (m.getNoteNumber());
-            sender.send("/FMSynth/freq", freq);
+            juce::OSCMessage msg("/FMSynth/control");
+            msg.addFloat32(freq);
+            msg.addFloat32(mul);
+            sender.send(msg);
+            //sender.send("/FMSynth/freq", freq, "/FMSynth/mul", 1.0);
             m = juce::MidiMessage::noteOn(m.getChannel(), m.getNoteNumber(), newVel);
         }
-        else if (m.isNoteOff()){}
+        else if (m.isNoteOff())
+        {
+            mul = 0.0;
+            juce::OSCMessage msg("/FMSynth/control");
+            msg.addFloat32(freq);
+            msg.addFloat32(mul);
+            sender.send(msg);
+        }
         else if (m.isPitchWheel()){}
         processedMidi.addEvent(m,time);
     }
