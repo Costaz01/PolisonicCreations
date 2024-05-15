@@ -1,31 +1,43 @@
 s.reboot;
 
-
 (
 SynthDef(\FMSynth,
     {
-        arg freq = 440, modIndex = 3, modPartial = 1,
-        carPartial = 1, level = 0.05, outBus = 0,
-        effectBus, direct = 0.33;
-        var modSig, outSig;
-        modSig = SinOsc.ar(freq*modPartial,0,freq*modIndex);
-        outSig = SinOsc.ar(freq * carPartial + modSig,0,level);
- Out.ar(effectBus,outSig * (1 - direct));
-        Out.ar(outBus,(outSig * direct).dup);
+        arg freq = 440, mul = 1, outBus = 0;
+		var source;
+		source = SinOsc.ar(freq, 0.0, mul);
+        Out.ar(outBus, source);
     }
 ).add )
+
+(
+SynthDef(\LPFilter,
+	{
+		arg outBus = 0, freqfilter = 1000;
+		var sig, imp;
+
+		sig = PlayBuf.ar(1, outBus, 1, doneAction:0);
+		b = BLowPass(sig, \freq, freqfilter, \rq, 1);
+		Out.ar(outBus);
+}).add;
+)
+
 
 
 (
 var bus = Bus.audio(s);
-x= Synth(\FMSynth,[\freq,440,\modIndex,2,\modPartial, 2.4,\outBus,0,\level,0.1]);
-y= Synth.after(x,[\inBus,bus,\outBus,0]);
+x= Synth(\FMSynth,[\freq, 440, \mul, 0.0, \outBus, 0]);
 )
 
 
 (
 n = NetAddr("127.0.0.1");
-OSCFunc.newMatching({|msg, time, addr, recvPort| x.set(\freq,msg[1]).postln}, '/FMSynth/freq', n, 57120);
+OSCFunc({|msg, time, addr, recvPort|
+	var freq = msg[1].asFloat;
+	var mul = msg[2].asFloat;
+	postln(mul);
+	x.set(\freq, freq, \mul, mul).postln}, '/FMSynth/control', n, 57120);
 )
+
 
 OSCFunc.trace(true);
