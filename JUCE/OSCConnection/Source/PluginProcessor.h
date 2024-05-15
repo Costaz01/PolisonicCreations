@@ -57,6 +57,7 @@ public:
     // now we need a function that set the value of this variable whenever the slide value is changed
     float noteOnVel;
     float freq;
+    float mul;
     
     //********************************************************************************************//
 
