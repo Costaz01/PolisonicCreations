@@ -12,7 +12,7 @@ float knobValue = 20; // Valore iniziale del knob CutOff
 float detuneKnobValue = 0; // Valore iniziale del knob Detune
 
 void setup() {
-  size(400, 300);
+  size(400, 500);
   oscP5 = new OscP5(this, 12000); // Inizializza oscP5 sulla porta 12000
   myRemoteLocation = new NetAddress("127.0.0.1", 57120); // Indirizzo e porta del destinatario OSC
   
@@ -65,7 +65,7 @@ void setup() {
   // Crea il knob Detune
   cp5.addKnob("detuneKnob")
      .setLabel("Detune")
-     .setRange(0, 0.10)
+     .setRange(0, 0.1)
      .setValue(0)
      .setPosition(260, 150)
      .setRadius(20)
@@ -81,6 +81,30 @@ void setup() {
          sendOscMessage("/detune", detuneKnobValue);
        }
      });
+     
+     // Aggiungi questo codice all'interno della funzione setup() dopo l'inizializzazione di cp5
+
+// Aggiungi questo codice all'interno della funzione setup() dopo l'inizializzazione di cp5
+
+// Crea il menu a tendina per la selezione della forma d'onda
+DropdownList d1 = cp5.addDropdownList("myList-d1")
+                     .setPosition(50, 250)
+                     .setSize(120, 100)
+                     .setBackgroundColor(color(200))
+                     .setItemHeight(20)
+                     .setBarHeight(15);
+
+d1.addItem("Seno", 1);
+d1.addItem("Square", 2);
+d1.addItem("Saw", 3);
+
+d1.getCaptionLabel().set("Seleziona Onda");
+d1.onChange(new CallbackListener() {
+  public void controlEvent(CallbackEvent theEvent) {
+    int selected = int(d1.getValue());
+    sendOscMessage("/waveform", selected + 1);
+  }
+});
 }
 
 void draw() {
@@ -99,66 +123,17 @@ void sendOscMessage(String address, float value) {
   oscP5.send(myMessage, myRemoteLocation);
 }
 
+
+
 /*
-import oscP5.*;
-import netP5.*;
-import controlP5.*;
-
-OscP5 oscP5;
-NetAddress myRemoteLocation;
-ControlP5 cp5;
-
-boolean buttonState = false; // Stato del bottone: false è off, true è on
-float knobValue = 20; // Valore iniziale del knob
-
-void setup() {
-  size(400, 200);
-  oscP5 = new OscP5(this, 12000); // Inizializza oscP5 sulla porta 12000
-  myRemoteLocation = new NetAddress("127.0.0.1", 57120); // Indirizzo e porta del destinatario OSC
-  
-  cp5 = new ControlP5(this);
-  // Crea un knob
-  cp5.addKnob("knob")
-     .setRange(20, 20000) // Imposta il range del knob da 20 a 20000
-     .setValue(20) // Imposta il valore iniziale del knob
-     .setPosition(260, 50) // Imposta la posizione del knob
-     .setRadius(50) // Imposta il raggio del knob
-     .setNumberOfTickMarks(100) // Imposta il numero di tacche
-     .setTickMarkLength(4) // Imposta la lunghezza delle tacche
-     .snapToTickMarks(true) // Fa sì che il knob si agganci alle tacche
-     .setColorForeground(color(255, 100, 0)) // Imposta il colore di primo piano
-     .setColorBackground(color(255, 255, 255)) // Imposta il colore di sfondo
-     .setColorActive(color(0, 255, 0)); // Imposta il colore attivo
-}
-
-void draw() {
-  background(255);
-  // Disegna il bottone
-  if (buttonState) {
-    fill(0, 255, 0); // Colore verde se il bottone è on
-  } else {
-    fill(255, 0, 0); // Colore rosso se il bottone è off
+// Questa funzione viene chiamata ogni volta che viene selezionato un elemento dal menu a tendina
+void controlEvent(ControlEvent event) {
+  if (event.isGroup()) {
+    // Invia un messaggio OSC con il valore corrispondente alla selezione
+    int value = int(event.getGroup().getValue());
+    OscMessage myMessage = new OscMessage("/waveform");
+    myMessage.add(value);
+    oscP5.send(myMessage, myRemoteLocation);
   }
-  rect(50, 75, 100, 50); // Disegna il bottone
-}
-
-void mousePressed() {
-  int buttonX = 50, buttonY = 75, buttonWidth = 100, buttonHeight = 50;
-  // Controlla se il mouse è all'interno del bottone
-  if (mouseX > buttonX && mouseX < buttonX + buttonWidth && mouseY > buttonY && mouseY < buttonY + buttonHeight) {
-    buttonState = !buttonState; // Cambia lo stato del bottone
-    sendOscMessage("/button", buttonState ? 1 : 0); // Invia il messaggio OSC
-  }
-}
-
-void knob(float theValue) {
-  knobValue = theValue;
-  sendOscMessage("/knob", theValue); // Invia il valore del knob via OSC
-}
-
-void sendOscMessage(String address, float value) {
-  OscMessage myMessage = new OscMessage(address);
-  myMessage.add(value);
-  oscP5.send(myMessage, myRemoteLocation);
 }
 */
