@@ -574,13 +574,17 @@ void draw() {
 // Record Button Update
 
   if(recordButtonState){                                       // "recordButtonState" is our variable that tells us if the record button is in "record" mode: true if active
-     recordButton.setValue(1);                                 // When we enter this "if" the "recordButtonState" is set as "true", so we need to adjourn the corresponding controller's value, which we're going to send to SuperCollider 
-     recordButtonState = !recordButtonState;                   // After the recording is ended, we need to go to the next state of the recordButton, so we adjourn this value in order to avoid entering again this "if" section.
+     recordButton.setValue(1);                                 // When we enter this "if" the "recordButtonState" is set as 
+                                                               //   "true", so we need to adjourn the corresponding controller's value, which we're going to send to SuperCollider 
+     recordButtonState = !recordButtonState;                   // After the recording is ended, we need to go to the next state 
+                                                               //    of the recordButton, so we adjourn this value in order to avoid entering again this "if" section.
      recordButton.setLabel("Record");                          
      recordButton.setColorBackground(color(194, 1, 20));
-     if (d2.getValue() == 1){                            // We're still in the recordButtonState "if". This second conditional is true when the second dropdown list is on "amp" mode: this means that we're going to modulate the amplitude through the sensor's input
+     if (d2.getValue() == 1){                            // We're still in the recordButtonState "if". This second conditional is true when the second dropdown list is on 
+                                                         //   "amp" mode: this means that we're going to modulate the amplitude through the sensor's input
      amp = map(amp, 0, 127, 0.3, 0.8);                   // Here we map the sensor's amplitude that we receive from arduino inside the range "0.3-0.8", which has been optimized through testing
-     sendOscMessage("/amp", amp);                        // Now we can send the OSC message through the "sendOscMessage" function, that is used for the interaction logic taking into account arduino messages
+     sendOscMessage("/amp", amp);                        // Now we can send the OSC message through the "sendOscMessage" function, that is used
+                                                         //    for the interaction logic taking into account arduino messages
        } 
        else if (d2.getValue() == 0){                     // Same as above, but in this case we select the filter cutoff modulation, which is mapped in the range 70-200
         amp = map(amp, 0, 127, 70, 200);
@@ -590,8 +594,10 @@ void draw() {
        else {                                            // If the mode selection has yet to be done, don't do anything.
        }
      }  
-   else if(loopButtonState){                                    // If the "record" button isn't in the record mode, then "recordButtonState" == "false" and we enter in the "loop" state, through another state variable
-     recordButton.setLabel("Loop");                             // Note: we don't need to adjourn the recordButton state because it's active in this case too: here we're still sending osc messages, but they're looped.
+   else if(loopButtonState){                                    // If the "record" button isn't in the record mode, then "recordButtonState" == "false"
+                                                                //    and we enter in the "loop" state, through another state variable
+     recordButton.setLabel("Loop");                             // Note: we don't need to adjourn the recordButton state because it's active in this case too: here we're still
+                                                                //    sending osc messages, but they're looped.
      loopButtonState = !loopButtonState;                        // Again, this is needed to go to the next state
      recordButton.setColorBackground(color(150, 1, 200));
      if (d2.getValue() == 1){                            // Same as above
