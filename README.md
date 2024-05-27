@@ -1,4 +1,5 @@
 # Voice-Modulated Synthesizer Plugin - Read Me
+![Uploading Screenshot 2024-05-27 at 1.26.36 PM.png…]()
 
 ## Introduction
 Welcome to the Voice-Modulated Synthesizer Plugin, a cutting-edge tool that integrates vocal recordings with synthesizer parameters to create unique soundscapes. This plugin allows you to use your voice to control various aspects of electronic music production, offering a new level of expression and creativity.
