@@ -19,8 +19,9 @@ Here we define the main SynthDef that generates the sound of our synthesizer:
 2. Detuning: It creates detuned versions of these waveforms (`detunedSin`, `detunedSquare`, `detunedSaw`). Detuning is used to create a thicker, richer sound by slightly varying the frequency of multiple waves of the same type.
 3. Mixing: It mixes the original and detuned waveforms together (`mixed`). This is done by simply adding the waveforms together.
 4. Envelope Generation**: It creates an envelope (`env`) using the ADSR (Attack, Decay, Sustain, Release) model. This envelope is used to shape the amplitude of the sound over time. 
-5. Filtering: If `lpfOn` is set to 1, it applies a low-pass filter (`RLPF`) to the mixed signal. The cutoff frequency of this filter can be modulated by an envelope (`filterEnv`). This can be used to create dynamic changes in the timbre of the sound.
-6. Output: Finally, it sends the signal to the audio output (`Out.ar`). The signal is panned based on the `pan` argument, allowing for stereo effects.
+5. Filter Envelope Generation: It creates the filter's envelope ('filterEnv'), using the ADSR envelope 
+6. Filtering: If `lpfOn` is set to 1, it applies a low-pass filter (`RLPF`) to the mixed signal. The cutoff frequency of this filter can be modulated by an envelope (`filterEnv`). This can be used to create dynamic changes in the timbre of the sound.
+7. Output: Finally, it sends the signal to the audio output (`Out.ar`). The signal is panned based on the `pan` argument, allowing for stereo effects.
 */
 
 SynthDef(\dynamicLPF, { |freq=440, amp=0.1, gate=0, detune=0.1, cutOff = 500, lpfOn=0, detuneActive=0, out= 0, sin=0, square=0, saw=0, attack=0.01, decay=0, sustain=1, release=0.0, volume = 1, pan = 0.0, resonance = 1.0, filterAttack = 0.01, filterSustain = 1.00, filterDecay = 0.0, filterRelease = 0.0|
@@ -30,7 +31,7 @@ SynthDef(\dynamicLPF, { |freq=440, amp=0.1, gate=0, detune=0.1, cutOff = 500, lp
 	sourceSquare = Pulse.ar(freq, mul:amp*0.3) * square; // square wave generation
 	sourceSaw = Saw.ar(freq, mul:amp*0.3) * saw; // saw wave generation
 	env = EnvGen.kr(Env.adsr(attack, decay, sustain, release), gate, doneAction:2);
-	filterEnv = EnvGen.ar(Env.adsr(filterAttack, filterDecay, filterSustain, filterRelease), doneAction:2);
+	filterEnv = EnvGen.ar(Env.adsr(filterAttack, filterDecay, filterSustain, filterRelease), doneAction:2); 	
 	detunedSin = SinOsc.ar(freq * (1 + detune), mul:amp*0.3) * sin * detuneActive;
 	detunedSquare = Pulse.ar(freq * (1 + detune), mul:amp*0.3) * square * detuneActive; // second square wave for detuning if detuneActive=1
 	detunedSaw = Saw.ar(freq * (1 + detune), mul:amp*0.3) * saw * detuneActive ;
@@ -44,6 +45,10 @@ SynthDef(\dynamicLPF, { |freq=440, amp=0.1, gate=0, detune=0.1, cutOff = 500, lp
 // ---------------- FX CHAIN DEFINITION ---------------------- //
 
 // FX Chain
+
+// It defines a Synth containing an fxChain. This FX chain has an input bus that we can chose (so we could potentially attach it anywhere we want)
+//   and as an output we have the "plugin" variable, which has the fx lined up in series. We will be able to bypass those plugins through the fx1 & fx2 parameters
+
 SynthDef(\fxChain, { |bus, fx1 = 2, mix, fx2 = 2|
 	var plugin = In.ar(bus, 2);
 	plugin = VSTPlugin.ar(plugin, 2, fx2, id:\distortion);
@@ -52,13 +57,20 @@ SynthDef(\fxChain, { |bus, fx1 = 2, mix, fx2 = 2|
 
 }).add;
 
+// After adding the synthesizer to the server, we instantiate an instance of it, called ~fxSynth. This instance is placed on the ~fxBus declared before, 
+// and it's positioned at the end of it through the use of the "addAction" parameter. 
+
 ~fxSynth = Synth(\fxChain, [\bus, ~fxBus], addAction: \addToTail);
+
+// Now we route the ~fxBus to the main output bus through the following SynthDef, which is instantly allocated. Again, this is added to the Tail of the Group 1
 
 SynthDef(\output, { arg in = 0, out = 0;
     Out.ar(out, In.ar(in, 2))
 	}).play(1 ,[\in, ~fxBus, \out, 0], addAction: \addToTail);
 
+// The plugin controller is then instantiated. Since we implemented two fx inside the same synthDef, we need to use the ".collect" method to create one plugin controller per effect.
 	~fx = VSTPluginController.collect(~fxSynth);
+// Open the vst Plugins
 	~fx.distortion.open("SubDominant.vst3");
 	~fx.chorus.open("basicChorus.vst3");
 
