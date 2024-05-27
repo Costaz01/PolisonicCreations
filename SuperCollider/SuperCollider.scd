@@ -77,9 +77,9 @@ SynthDef(\output, { arg in = 0, out = 0;
 // ============================================ MIDI NOTE ON/OFF ==================================================== //
 /*
 Here we handle MIDI note on and off messages:
-1. MIDI Channel and Notes Initialization**: It first sets the MIDI channel (`~midiChannel`) to 0 and initializes an array (`~notes`) with 128 elements, representing the 128 possible MIDI notes.
-2. MIDI Note On Handling**: The `MIDIdef.noteOn` function is used to define what happens when a MIDI note on message is received. If the channel of the incoming MIDI message matches `~midiChannel`, a new Synth (`~notes[note]`) is created based on the `dynamicLPF` SynthDef defined earlier. The parameters of the Synth are set based on various variables.
-3. MIDI Note Off Handling**: The `MIDIdef.noteOff` function is used to define what happens when a MIDI note off message is received. If the channel of the incoming MIDI message matches `~midiChannel`, the gate of the corresponding Synth is set to 0, which should trigger the release stage of the envelope. The Synth is then freed and the corresponding element in the `~notes` array is set to nil.
+1. MIDI Channel and Notes Initialization: It first sets the MIDI channel (`~midiChannel`) to 0 and initializes an array (`~notes`) with 128 elements, representing the 128 possible MIDI notes.
+2. MIDI Note On Handling: The `MIDIdef.noteOn` function is used to define what happens when a MIDI note on message is received. If the channel of the incoming MIDI message matches `~midiChannel`, a new Synth (`~notes[note]`) is created based on the `dynamicLPF` SynthDef defined earlier. The parameters of the Synth are set based on various variables.
+3. MIDI Note Off Handling: The `MIDIdef.noteOff` function is used to define what happens when a MIDI note off message is received. If the channel of the incoming MIDI message matches `~midiChannel`, the gate of the corresponding Synth is set to 0, which should trigger the release stage of the envelope. The Synth is then freed and the corresponding element in the `~notes` array is set to nil.
 */
 
 ~midiChannel = 0; 
