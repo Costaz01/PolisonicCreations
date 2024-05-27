@@ -504,9 +504,9 @@ void draw() {
 
    while (myPort.available() > 0) {
       boolean bool = false;
-      char receivedChar = myPort.readChar(); // Read a single character
+      char receivedChar = myPort.readChar();
       if (Character.isDigit(receivedChar)) {
-        charArray += receivedChar; // Append digit characters to the string
+        charArray += receivedChar; 
       } else if (receivedChar == 'b') {
         float val = Integer.parseInt(charArray);
         cutOff = round(map(val, 0, 127, 0, 200));
@@ -891,7 +891,7 @@ void sendOscMessage(String address, float value) {
  
 float logScale(int intValue, int maxRangeIn, float start, float end){
   float val;
-  if(start == 0){
+  if(start == 0){                                                              // Handle the problematic case of -infinty 
     val = pow(10, (map (intValue, 0, maxRangeIn, 0, log(end)/log(10))));
   }
   else{
