@@ -492,9 +492,15 @@ void draw() {
   background(img16);  
     }
 
-// @CLAUDIO
-
 // ============================ ARDUINO INTERACTION ================================= //
+
+// This code is used to interact with an Arduino device. It reads data sent from the Arduino over a serial port and uses it to control various parameters of a sound synthesis system. 
+// Here’s a breakdown of what each part does:
+// 1. myPort.available() > 0: This checks if there is any data available to read from the serial port.
+// 2. myPort.readChar(): This reads a single character from the serial port.
+// 3. Character.isDigit(receivedChar): This checks if the received character is a digit. If it is, it appends the digit to a string (charArray).
+// 4. The following if statements check if the received character matches a specific letter. Each letter corresponds to a different parameter of the sound synthesis system. 
+// If a match is found, the code parses the string of digits into an integer or a boolean value and uses it to update the corresponding parameter. The string of digits is then cleared.
 
    while (myPort.available() > 0) {
       boolean bool = false;
