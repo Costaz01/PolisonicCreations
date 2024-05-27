@@ -25,7 +25,7 @@ Welcome to the Voice-Modulated Synthesizer Plugin, a cutting-edge tool that inte
 
 ## Getting Started
 1. Connect your MIDI device and Arduino to your computer.
-2. Launch the plugin through SuperCollider.
+2. Launch the GUI in Processing and run the SuperCollider code.
 3. Select your desired waveform and adjust the ADSR envelope to shape your sound.
 4. Record your voice using the Record Button and apply the rhythm to modulate parameters.
 5. Experiment with the effects to find your unique sound.
