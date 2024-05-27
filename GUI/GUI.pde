@@ -102,8 +102,8 @@ void setup() {
   
 // Arduino setup
 
-  //String portName = Serial.list()[2]; // Sostituisci con il numero di porta corretto
-  //myPort = new Serial(this, portName, 115200);
+  String portName = Serial.list()[2]; // Sostituisci con il numero di porta corretto
+  myPort = new Serial(this, portName, 115200);
 
 // Controllers setup
   
