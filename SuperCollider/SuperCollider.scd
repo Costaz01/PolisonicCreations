@@ -1,6 +1,6 @@
-Server.killAll;
-s.reboot;
-MIDIClient.init;
+Server.killAll; // kill the Server 
+s.reboot; // reboot the server
+MIDIClient.init; // scan the available MIDI Input
 MIDIIn.connectAll; // connect MIDI Input
 
 (
@@ -70,8 +70,8 @@ Here we handle MIDI note on and off messages:
 3. MIDI Note Off Handling**: The `MIDIdef.noteOff` function is used to define what happens when a MIDI note off message is received. If the channel of the incoming MIDI message matches `~midiChannel`, the gate of the corresponding Synth is set to 0, which should trigger the release stage of the envelope. The Synth is then freed and the corresponding element in the `~notes` array is set to nil.
 */
 
-~midiChannel = 0; // define the MIDI channel
-~notes = Array.newClear(128); // define number of notes
+~midiChannel = 0; 
+~notes = Array.newClear(128); 
 MIDIdef.noteOn(\startSynth, { |vel, note, chan|
 
 	if(chan == ~midiChannel, {
@@ -120,7 +120,7 @@ In this section we handle Open Sound Control (OSC) messages that are sent from t
 1. OSC Address Initialization: Initially we set up the OSC communication by defining the network address (`n = NetAddr("127.0.0.1")`) to which OSC messages will be sent.
 2. OSC Message Handling: The `OSCFunc` function is used to define what happens when an OSC message is received. The OSC message is expected to have the address `/address` and to be sent to the network address `n` on port `57120`.
 3. Value Update: The first argument of the OSC message (`msg[1]`) is used to update the value that the specific `OSCFunc` has to change. 
-4. Synth Update: For each active Synth in `~notes`, it updates the parameter that corresponds to the value to be updated.
+4. Synth Update: For each active Synth in `~notes`, it updates the parameter that corresponds to the value that has been updated.
 */
 
 n = NetAddr("127.0.0.1"); // set the receiving address for OSC Messages
@@ -334,7 +334,7 @@ OSCFunc({|msg, time, addr, recvPort|
 }, '/filterSustain', n, 57120);
 
 // ------------- JUCE FXs ------------------ //
-// Here we control the parameters of the imported JUCE Effects through buttons and knobs in the GUI
+// Here we control the parameters of the imported JUCE Effects through buttons and knobs in the GUI. In particular we use the (`VSTPluginController.set(parameter, value)`) function to update the value of a specific parameter of the imported effect with the new value sent from the GUI.
 
 // ------------- CHORUS ON/OFF ------------------ //
 // Here we control the chorus state through a button in the GUI: if ~chorusToggle = 1 then the BYPASS is activated so the chorus is turned OFF, otherwise the BYPASS is deactivated so the chorus is turned ON.
